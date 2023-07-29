@@ -1,0 +1,538 @@
+﻿@page
+@model Serverside_Pagination.Pages.Student.StudentsModel
+@{ var currentPage = 1;
+                if (int.TryParse(Request.Query["page"], out var parsedPage))
+                {
+                    currentPage = parsedPage;
+                }
+                var pageSize = 10;
+                var totalStudents = Model.Students.Count();
+                var totalPages = (int)Math.Ceiling((double)totalStudents / pageSize);
+                var studentsForPage = Model.Students.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList(); }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Students</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <style>
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Students</h1>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addStudentModal">Add Student</button>
+    <br /><br />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Birth Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in studentsForPage)
+            {
+<tr>
+    <td>@student.Name</td>
+    <td>@student.Email</td>
+    <td>@student.BirthDate.ToShortDateString()</td>
+    <td>
+        <button type="button" class="btn btn-info editStudent" data-id="@student.Id" data-toggle="modal" data-target="#editStudentModal">Edit</button>
+        <button type="button" class="btn btn-danger deleteStudent" data-id="@student.Id">Delete</button>
+    </td>
+</tr>            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            @for (var i = 1; i <= totalPages; i++)
+            {
+<li class="page-item @(i == currentPage ? "active" : "")">
+    <a class="page-link" href="/Students?page=@i">@i</a>
+</li>            }
+        </ul>
+    </nav>
+
+
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addStudentForm">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <span class="error-message" id="name-error" style="display: none;">Name is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <span class="error-message" id="email-error" style="display: none;">Email is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDate">Birth Date</label>
+                            <input type="date" class="form-control" id="birthDate" name="birthDate" required>
+                            <span class="error-message" id="birthDate-error" style="display: none;">Birth Date is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" class="form-control" id="address" name="address" required>
+                            <span class="error-message" id="address-error" style="display: none;">Address is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <select class="form-control" id="city" name="city" required>
+                                <option value="">Select City</option>
+                                <option value="City 1">Kangra</option>
+                                <option value="City 2">Delhi</option>
+                                <option value="City 3">Chandigarh</option>
+
+                            </select>
+                            <span class="error-message" id="city-error" style="display: none;">City is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <select class="form-control" id="country" name="country" required>
+                                <option value="">Select Country</option>
+                                <option value="Country 1">India</option>
+                                <option value="Country 2">Canada</option>
+                                <option value="Country 3">China</option>
+
+                            </select>
+                            <span class="error-message" id="country-error" style="display: none;">Country is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="activeStatus">Active Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="activeStatus" name="activeStatus">
+                                <label class="form-check-label" for="activeStatus">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Male" required>
+                                <label class="form-check-label" for="genderMale">
+                                    Male
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Female" required>
+                                <label class="form-check-label" for="genderFemale">
+                                    Female
+                                </label>
+                            </div>
+                            <span class="error-message" id="gender-error" style="display: none;">Gender is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseName">Course Name</label>
+                            <input type="text" class="form-control" id="courseName" name="courseName" required>
+                            <span class="error-message" id="courseName-error" style="display: none;">Course Name is required.</span>
+                        </div>
+                        <div id="dataSavedMessage" class="alert alert-success" style="display: none;">Data saved successfully!</div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addStudentButton">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1" role="dialog" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStudentForm">
+                        <input type="hidden" id="editStudentId" name="id">
+                        <div class="form-group">
+                            <label for="editName">Name</label>
+                            <input type="text" class="form-control" id="editName" name="name" required>
+                            <span class="error-message" id="editName-error" style="display: none;">Name is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                            <span class="error-message" id="editEmail-error" style="display: none;">Email is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editBirthDate">Birth Date</label>
+                            <input type="date" class="form-control" id="editBirthDate" name="birthDate" required>
+                            <span class="error-message" id="editBirthDate-error" style="display: none;">Birth Date is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAddress">Address</label>
+                            <input type="text" class="form-control" id="editAddress" name="address" required>
+                            <span class="error-message" id="editAddress-error" style="display: none;">Address is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCity">City</label>
+                            <select class="form-control" id="editCity" name="city" required>
+                                <option value="">Select City</option>
+                                <option value="City 1">Kangra</option>
+                                <option value="City 2">Delhi</option>
+                                <option value="City 3">Chandigarh</option>
+
+                            </select>
+                            <span class="error-message" id="editCity-error" style="display: none;">City is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCountry">Country</label>
+                            <select class="form-control" id="editCountry" name="country" required>
+                                <option value="">Select Country</option>
+                                <option value="Country 1">India</option>
+                                <option value="Country 2">Canada</option>
+                                <option value="Country 3">China</option>
+
+                            </select>
+                            <span class="error-message" id="editCountry-error" style="display: none;">Country is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActiveStatus">Active Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editActiveStatus" name="activeStatus">
+                                <label class="form-check-label" for="editActiveStatus">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGender">Gender</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="editGenderMale" value="Male" required>
+                                <label class="form-check-label" for="editGenderMale">
+                                    Male
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="editGenderFemale" value="Female" required>
+                                <label class="form-check-label" for="editGenderFemale">
+                                    Female
+                                </label>
+                            </div>
+                            <span class="error-message" id="editGender-error" style="display: none;">Gender is required.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCourse">Course</label>
+                            <input type="text" class="form-control" id="editCourseName" name="courseName" required>
+
+                            <span class="error-message" id="editCourse-error" style="display: none;">Course is required.</span>
+                        </div>
+                        <!-- Add more input fields for other student properties -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="updateStudentButton">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Delete Student Confirmation Modal -->
+    <div class="modal fade" id="deleteStudentModal" tabindex="-1" role="dialog" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteStudentModalLabel">Delete Student</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this student?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="deleteStudentButton">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <script>
+        $(document).ready(function () {
+            function clearErrorMessages() {
+                $('.error-message').hide();
+            }
+
+            // Load student data for the specified page number
+            function loadStudentData(pageNumber) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/Students/Students',
+                    data: {
+                        page: pageNumber
+                    },
+                    success: function (data) {
+                        $('tbody').html(data);
+
+                        // Update active page link
+                        $('.pagination li').removeClass('active');
+                        $('.pagination li:nth-child(' + (pageNumber + 1) + ')').addClass('active');
+                    }
+                });
+            }
+
+
+
+            /*Code For Add Student*/
+            $(document).ready(function () {
+
+                function clearErrorMessages() {
+                    $('.error-message').hide();
+                }
+
+
+                $('#addStudentButton').on('click', function () {
+                    clearErrorMessages();
+
+                    var addStudentForm = $('#addStudentForm');
+                    var formData = addStudentForm.serialize();
+
+
+                    var name = $('#name').val();
+                    var email = $('#email').val();
+                    var birthDate = $('#birthDate').val();
+                    var address = $('#address').val();
+                    var city = $('#city').val();
+                    var country = $('#country').val();
+                    var activeStatus = $('#activeStatus').is(':checked');
+                    var gender = $('input[name="gender"]:checked').val();
+                    var courseName = $('#courseName').val();
+
+
+                    var isValid = true;
+                    if (name.trim() === '') {
+                        $('#name-error').show();
+                        isValid = false;
+                    }
+                    if (email.trim() === '') {
+                        $('#email-error').show();
+                        isValid = false;
+                    }
+                    if (birthDate.trim() === '') {
+                        $('#birthDate-error').show();
+                        isValid = false;
+                    }
+                    if (address.trim() === '') {
+                        $('#address-error').show();
+                        isValid = false;
+                    }
+                    if (city.trim() === '') {
+                        $('#city-error').show();
+                        isValid = false;
+                    }
+                    if (country.trim() === '') {
+                        $('#country-error').show();
+                        isValid = false;
+                    }
+                    if (gender === undefined) {
+                        $('#gender-error').show();
+                        isValid = false;
+                    }
+                    if (courseName.trim() === '') {
+                        $('#courseName-error').show();
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        return;
+                    }
+
+                    var studentData = {
+                        "Name": name,
+                        "Email": email,
+                        "BirthDate": birthDate,
+                        "Address": address,
+                        "City": city,
+                        "Country": country,
+                        "ActiveStatus": activeStatus,
+                        "Gender": gender,
+                        "Course": courseName  
+                    };
+
+                    var settings = {
+                        "url": "https://localhost:44332/api/Students/Student",
+                        "method": "POST",
+                        "timeout": 0,
+                        "headers": {
+                            "Content-Type": "application/json"
+                        },
+                        "data": JSON.stringify(studentData),
+                    };
+
+
+                    $.ajax(settings).done(function (response) {
+                        console.log(response);
+                        location.reload();
+                        $('#addStudentModal').modal('hide');
+                    });
+                });
+                $('#addStudentModal').on('hidden.bs.modal', function () {
+                    clearErrorMessages();
+                });
+            });
+
+            // code for Edit Student
+            $('.editStudent').on('click', function () {
+                var studentId = $(this).data('id');
+                var editStudentForm = $('#editStudentForm');
+                function populateStudentData(student) {
+                    editStudentForm.find('#editStudentId').val(student.id);
+                    editStudentForm.find('#editName').val(student.name);
+                    editStudentForm.find('#editEmail').val(student.email);
+                    editStudentForm.find('#editBirthDate').val(student.birthDate);
+                    editStudentForm.find('#editAddress').val(student.address);
+                    editStudentForm.find('#editCountry').val(student.country);
+                    editStudentForm.find('#editCity').val(student.city);
+                    editStudentForm.find('#editCourseName').val('Math');
+                    editStudentForm.find('#editActiveStatus').prop('checked', student.activeStatus);
+
+                    if (student.gender === 'Male') {
+                        editStudentForm.find('#editGenderMale').prop('checked', true);
+                    } else if (student.gender === 'Female') {
+                        editStudentForm.find('#editGenderFemale').prop('checked', true);
+                    }
+                    $('#editStudentModal').modal('show');
+                }
+                $.ajax({
+                    type: 'GET',
+                    url: 'https://localhost:44332/api/Students/' + studentId,
+                    success: function (student) {
+                        populateStudentData(student);
+                    },
+                    error: function (error) {
+                        console.log('Error fetching student:', error);
+                    }
+                });
+            });
+
+            $('#updateStudentButton').on('click', function () {
+                clearErrorMessages();
+
+                var editStudentForm = $('#editStudentForm');
+                var studentId = editStudentForm.find('#editStudentId').val();
+                var name = editStudentForm.find('#editName').val();
+                var email = editStudentForm.find('#editEmail').val();
+                var birthDate = editStudentForm.find('#editBirthDate').val();
+                var address = editStudentForm.find('#editAddress').val();
+                var city = editStudentForm.find('#editCity').val();
+                var country = editStudentForm.find('#editCountry').val();
+                var activeStatus = editStudentForm.find('#editActiveStatus').prop('checked');
+                var gender = editStudentForm.find('input[name="gender"]:checked').val();
+                var courseName = editStudentForm.find('#editCourseName').val();
+
+                var isValid = true;
+                // Perform validation checks here
+
+                if (!isValid) {
+                    return;
+                }
+
+                var studentData = {
+                    "Id": studentId,
+                    "Name": name,
+                    "Email": email,
+                    "BirthDate": birthDate,
+                    "Address": address,
+                    "City": city,
+                    "Country": country,
+                    "ActiveStatus": activeStatus,
+                    "Gender": gender,
+                    "Course": courseName
+                };
+
+                var settings = {
+                    "url": 'https://localhost:44332/api/Students/' + studentId,
+                    "method": "PUT",
+                    "timeout": 0,
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "data": JSON.stringify(studentData),
+                };
+
+                $.ajax(settings)
+                    .done(function (response) {
+                        console.log(response);
+                        location.reload();
+                        $('#editStudentModal').modal('hide');
+                    })
+                    .fail(function (error) {
+                        console.log('Error updating student:', error);
+                    });
+            });
+
+            $('#editStudentModal').on('hidden.bs.modal', function () {
+                clearErrorMessages();
+            });
+
+
+
+            // Delete student
+            $('.deleteStudent').on('click', function () {
+                var studentId = $(this).data('id');
+                $('#deleteStudentButton').data('id', studentId);
+                $('#deleteStudentModal').modal('show');
+            });
+
+            $('#deleteStudentButton').on('click', function () {
+                var studentId = $(this).data('id');
+                var deleteUrl = 'https://localhost:44332/api/Students/' + studentId;
+                $.ajax({
+                    url: deleteUrl,
+                    type: 'DELETE',
+                    success: function (result) {
+                        location.reload();
+                        $('#deleteStudentModal').modal('hide');
+                    },
+                    error: function (error) {
+                        console.log('Error deleting student:', error);
+                    }
+                });
+            });
+
+            // Pagination
+            $('.pagination a.page-link').on('click', function (e) {
+                e.preventDefault();
+                var pageNumber = $(this).text();
+                loadStudentData(pageNumber);
+            });
+
+            // Initial data load
+            loadStudentData(1);
+        });
+    </script>
+</body>
+</html>

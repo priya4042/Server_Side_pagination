@@ -1,0 +1,70 @@
+﻿@page
+@model Serverside_Pagination.Pages.Login.LoginModel
+@{
+}
+
+
+
+<h1>Login</h1>
+
+<head>
+   @* <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-pzjw8p+ua8m3+6zF8wRpv6X18ck4H5ScKbXn2xgpPTm0szTtfz5K67LqZVbz4jB4" crossorigin="anonymous">*@
+    <style>
+        .container {
+            max-width: 400px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<div class="container">
+    <form method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" class="form-control" asp-for="login.Username" />
+            <span asp-validation-for="login.Username" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" type="password" class="form-control" asp-for="login.Password" />
+            <span asp-validation-for="login.Password" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary" asp-page-handler="Login">Login</button>
+
+    </form>
+    <div asp-validation-summary="All" class="text-danger mt-3"></div>
+    @if (TempData.ContainsKey("Message"))
+    {
+        <div class="alert alert-success mt-3" role="alert">
+            @TempData["Message"]
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+    <script>
+        $(function () {
+            $("form").validate({
+                rules: {
+                    "login.Username": {
+                        required: true,
+                    },
+                    "login.Password": {
+                        required: true,
+                    }
+                },
+                messages: {
+                    "login.Username": {
+                        required: "Please enter your username",
+                    },
+                    "login.Password": {
+                        required: "Please enter your password",
+                    }
+                }
+            });
+        });
+    </script>
+}
